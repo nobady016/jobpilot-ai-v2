@@ -22,6 +22,7 @@ import { RemindersView } from './components/reminders/RemindersView';
 import { ExtensionSimulatorView } from './components/extension/ExtensionSimulatorView';
 import { AdminView } from './components/admin/AdminView';
 import { SettingsView } from './components/settings/SettingsView';
+import { AutonomousApplyView } from './components/auto-apply/AutonomousApplyView';
 
 const MainLayout: React.FC = () => {
   const { currentView, isLoading } = useApp();
@@ -48,6 +49,8 @@ const MainLayout: React.FC = () => {
     switch (currentView) {
       case 'dashboard':
         return <MainDashboard />;
+      case 'auto-apply':
+        return <AutonomousApplyView />;
       case 'jobs':
         return <JobsExplorer />;
       case 'job-detail':

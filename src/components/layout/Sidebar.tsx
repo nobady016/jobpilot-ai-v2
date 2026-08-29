@@ -36,6 +36,7 @@ export const Sidebar: React.FC = () => {
 
   const mainNav: SidebarItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'auto-apply', label: 'Auto-Apply Bot', icon: Zap, badge: '10-15/day' },
     { id: 'jobs', label: 'Find Jobs', icon: Compass, badge: jobs.length },
     { id: 'applications-tracker', label: 'Applications', icon: Briefcase, badge: activeAppsCount || undefined },
     { id: 'resume-tailor', label: 'Resume Tailor', icon: Sparkles },

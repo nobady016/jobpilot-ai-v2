@@ -88,6 +88,30 @@ export interface JobPreferences {
   autoGenerateCoverLetter?: boolean;
   requireApprovalBeforeApply?: boolean;
   defaultResumeTemplate?: 'modern' | 'ats' | 'classic' | 'minimal';
+  // Autonomous Background Auto-Apply Engine Settings
+  autoApplyEnabled?: boolean;
+  autoApplyDailyTarget?: number; // e.g. 10 to 15 per day
+  autoApplyMinMatchScore?: number; // e.g. 85%
+  autoApplyPreferredPortals?: string[]; // ['greenhouse', 'lever', 'linkedin', 'direct']
+  autoApplyNotifyEmail?: boolean;
+  autoApplyHumanToneOnly?: boolean;
+  lastAutonomousRun?: string;
+  todayAppliedCount?: number;
+}
+
+export interface AutonomousApplyLog {
+  id: string;
+  timestamp: string;
+  jobId: string;
+  jobTitle: string;
+  company: string;
+  portal: string;
+  matchScore: number;
+  status: 'applied' | 'tailored_ready' | 'skipped_low_match' | 'skipped_duplicate';
+  tailoredResumeTitle: string;
+  coverLetterGenerated: boolean;
+  humanToneScore: number;
+  reason: string;
 }
 
 export interface ResumeVersion {

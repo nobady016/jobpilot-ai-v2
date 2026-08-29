@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import { db } from './server/storage';
 import { AIJobServices } from './server/aiServices';
 import { jobProviderManager } from './server/jobProviders';
+import { autoApplyEngine } from './server/autoApplyEngine';
 
 async function startServer() {
   const app = express();
@@ -330,6 +331,31 @@ async function startServer() {
   // Dashboard Stats
   app.get('/api/dashboard/stats', (req: Request, res: Response) => {
     res.json(db.getDashboardStats());
+  });
+
+  // Autonomous Auto-Apply Engine Routes
+  app.get('/api/auto-apply/status', (req: Request, res: Response) => {
+    const prefs = db.getPreferences();
+    const logs = autoApplyEngine.getLogs();
+    res.json({
+      enabled: prefs.autoApplyEnabled ?? true,
+      dailyTarget: prefs.autoApplyDailyTarget ?? 12,
+      minMatchScore: prefs.autoApplyMinMatchScore ?? 85,
+      preferredPortals: prefs.autoApplyPreferredPortals ?? ['greenhouse', 'lever', 'linkedin', 'direct'],
+      lastAutonomousRun: prefs.lastAutonomousRun || new Date().toISOString(),
+      todayAppliedCount: prefs.todayAppliedCount ?? 12,
+      logs
+    });
+  });
+
+  app.post('/api/auto-apply/run-batch', async (req: Request, res: Response) => {
+    try {
+      const { count } = req.body;
+      const result = await autoApplyEngine.runAutonomousDailyBatch(count ? Number(count) : undefined);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Auto-Apply batch run failed' });
+    }
   });
 
   // Export Data (JSON)

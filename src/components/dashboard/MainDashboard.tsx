@@ -59,26 +59,52 @@ export const MainDashboard: React.FC = () => {
             Good morning, {userProfile?.name?.split(' ')[0] || 'Alex'}
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Here&apos;s what&apos;s happening with your job search on JobPilot AI.
+            Autonomous engine is configured to submit 10-15 applications daily without manual opening.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
+            onClick={() => setCurrentView('auto-apply')}
+            className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 border border-emerald-400/30"
+          >
+            <Zap className="w-3.5 h-3.5 fill-white" />
+            <span>Auto-Apply Bot (10-15/day)</span>
+          </button>
+          <button
             onClick={() => setCurrentView('jobs')}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5"
           >
-            <Zap className="w-3.5 h-3.5 fill-white" />
             <span>Discover Jobs</span>
           </button>
-          <button
-            onClick={() => setCurrentView('resume-tailor')}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Tailor Resume</span>
-          </button>
         </div>
+      </div>
+
+      {/* Autonomous Bot Live Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Zap className="w-5 h-5 fill-emerald-400 text-emerald-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-100">Autonomous Auto-Apply Active</span>
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                12 Applied Today
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              100% human-sound cover letters &amp; truthful responses are dispatched to top matches automatically.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setCurrentView('auto-apply')}
+          className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all shrink-0 flex items-center gap-1.5 self-start sm:self-auto"
+        >
+          <span>Manage Automation</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
       {/* Top Statistics Cards */}

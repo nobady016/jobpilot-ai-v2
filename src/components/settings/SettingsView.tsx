@@ -44,9 +44,12 @@ export const SettingsView: React.FC = () => {
     minSalary: jobPreferences?.minimumSalary || 95000,
     remotePref: jobPreferences?.remotePreference || ['remote', 'hybrid'],
     expLevel: jobPreferences?.experienceLevel || 'mid',
-    requireApproval: jobPreferences?.requireApprovalBeforeApply ?? true,
+    requireApproval: jobPreferences?.requireApprovalBeforeApply ?? false,
     autoSave: jobPreferences?.autoSaveStrongMatches ?? true,
-    autoTailor: jobPreferences?.autoTailorResume ?? true
+    autoTailor: jobPreferences?.autoTailorResume ?? true,
+    autoApplyEnabled: jobPreferences?.autoApplyEnabled ?? true,
+    autoApplyDailyTarget: jobPreferences?.autoApplyDailyTarget || 12,
+    autoApplyMinMatchScore: jobPreferences?.autoApplyMinMatchScore || 85
   });
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -62,7 +65,10 @@ export const SettingsView: React.FC = () => {
       experienceLevel: prefForm.expLevel as any,
       requireApprovalBeforeApply: prefForm.requireApproval,
       autoSaveStrongMatches: prefForm.autoSave,
-      autoTailorResume: prefForm.autoTailor
+      autoTailorResume: prefForm.autoTailor,
+      autoApplyEnabled: prefForm.autoApplyEnabled,
+      autoApplyDailyTarget: Number(prefForm.autoApplyDailyTarget),
+      autoApplyMinMatchScore: Number(prefForm.autoApplyMinMatchScore)
     });
   };
 
@@ -260,6 +266,31 @@ export const SettingsView: React.FC = () => {
                 <option value="mid">Mid-Level (3-5 years)</option>
                 <option value="senior">Senior (5+ years)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="text-slate-300 font-semibold block mb-1">Autonomous Daily Target (Jobs/Day)</label>
+              <select
+                value={prefForm.autoApplyDailyTarget}
+                onChange={e => setPrefForm({ ...prefForm, autoApplyDailyTarget: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200"
+              >
+                <option value={10}>10 companies / day</option>
+                <option value={12}>12 companies / day (Recommended)</option>
+                <option value={15}>15 companies / day (Max safe pace)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-slate-300 font-semibold block mb-1">Auto-Apply Min Compatibility Score (%)</label>
+              <input
+                type="number"
+                min="75"
+                max="98"
+                value={prefForm.autoApplyMinMatchScore}
+                onChange={e => setPrefForm({ ...prefForm, autoApplyMinMatchScore: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100"
+              />
             </div>
           </div>
         </form>

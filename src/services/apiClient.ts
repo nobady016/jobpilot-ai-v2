@@ -11,7 +11,8 @@ import {
   AIJobAnalysis,
   TailoredResumeResult,
   CoverLetter,
-  ApplicationStatus
+  ApplicationStatus,
+  AutonomousApplyLog
 } from '../types';
 import {
   INITIAL_USER_PROFILE,
@@ -723,6 +724,71 @@ export const api = {
           averageMatchScore: 91,
           weeklyApplicationsTarget: 10,
           currentWeekApplications: 7
+        };
+      }
+    );
+  },
+
+  // Autonomous Auto-Apply
+  getAutoApplyStatus: async (): Promise<{
+    enabled: boolean;
+    dailyTarget: number;
+    minMatchScore: number;
+    preferredPortals: string[];
+    lastAutonomousRun: string;
+    todayAppliedCount: number;
+    logs: AutonomousApplyLog[];
+  }> => {
+    return safeFetch<{
+      enabled: boolean;
+      dailyTarget: number;
+      minMatchScore: number;
+      preferredPortals: string[];
+      lastAutonomousRun: string;
+      todayAppliedCount: number;
+      logs: AutonomousApplyLog[];
+    }>(
+      '/api/auto-apply/status',
+      undefined,
+      () => {
+        const prefs = getStorageItem<JobPreferences>('preferences', INITIAL_JOB_PREFERENCES);
+        return {
+          enabled: prefs.autoApplyEnabled ?? true,
+          dailyTarget: prefs.autoApplyDailyTarget ?? 12,
+          minMatchScore: prefs.autoApplyMinMatchScore ?? 85,
+          preferredPortals: prefs.autoApplyPreferredPortals ?? ['greenhouse', 'lever', 'linkedin', 'direct'],
+          lastAutonomousRun: prefs.lastAutonomousRun || new Date().toISOString(),
+          todayAppliedCount: prefs.todayAppliedCount ?? 12,
+          logs: []
+        };
+      }
+    );
+  },
+
+  triggerAutoApplyBatch: async (count?: number): Promise<{
+    processed: number;
+    applied: number;
+    skipped: number;
+    logs: AutonomousApplyLog[];
+  }> => {
+    return safeFetch<{
+      processed: number;
+      applied: number;
+      skipped: number;
+      logs: AutonomousApplyLog[];
+    }>(
+      '/api/auto-apply/run-batch',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count }),
+      },
+      () => {
+        return {
+          processed: count || 12,
+          applied: count || 12,
+          skipped: 0,
+          logs: []
         };
       }
     );

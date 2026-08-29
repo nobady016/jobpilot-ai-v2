@@ -211,6 +211,11 @@ class StorageDatabase {
     return this.notifications;
   }
 
+  addNotification(notif: NotificationItem): void {
+    this.notifications.unshift(notif);
+    if (this.notifications.length > 50) this.notifications.pop();
+  }
+
   markNotificationRead(id: string): boolean {
     const n = this.notifications.find(item => item.id === id);
     if (!n) return false;

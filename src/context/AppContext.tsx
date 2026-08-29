@@ -22,6 +22,7 @@ export type AppView =
   | 'dashboard'
   | 'jobs'
   | 'job-detail'
+  | 'auto-apply'
   | 'resume-tailor'
   | 'resume-builder'
   | 'cover-letter'
