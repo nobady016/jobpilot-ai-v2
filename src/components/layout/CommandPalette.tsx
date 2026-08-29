@@ -52,14 +52,15 @@ export const CommandPalette: React.FC = () => {
     { label: 'Admin Telemetry Panel', view: 'admin' as AppView, icon: ShieldCheck, desc: 'System health & token telemetry' }
   ];
 
+  const q = (searchQuery || '').toLowerCase();
   const filteredNav = navItems.filter(item =>
-    item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.desc.toLowerCase().includes(searchQuery.toLowerCase())
+    (item.label || '').toLowerCase().includes(q) ||
+    (item.desc || '').toLowerCase().includes(q)
   );
 
-  const filteredJobs = jobs.filter(j =>
-    j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    j.company.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredJobs = (jobs || []).filter(j =>
+    (j.title || '').toLowerCase().includes(q) ||
+    (j.company || '').toLowerCase().includes(q)
   );
 
   return (

@@ -34,12 +34,14 @@ export const JobsExplorer: React.FC = () => {
   const [showSuspiciousWarning, setShowSuspiciousWarning] = useState(true);
 
   // Filter jobs
-  let filtered = jobs.filter(j => {
+  const search = (searchTerm || '').toLowerCase();
+  let filtered = (jobs || []).filter(j => {
     const matchSearch =
-      j.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      j.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      j.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      j.requiredSkills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
+      !search ||
+      (j.title || '').toLowerCase().includes(search) ||
+      (j.company || '').toLowerCase().includes(search) ||
+      (j.description || '').toLowerCase().includes(search) ||
+      (j.requiredSkills || []).some(s => (s || '').toLowerCase().includes(search));
 
     const matchRemote =
       filterRemote === 'all' || j.remoteType === filterRemote;

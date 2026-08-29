@@ -56,11 +56,13 @@ export const ApplicationsTrackerView: React.FC = () => {
     { id: 'rejected', label: 'Rejected', color: 'border-rose-500/30 bg-rose-950/20 text-rose-300' }
   ];
 
-  const filteredApps = applications.filter(a => {
+  const q = (searchQuery || '').toLowerCase();
+  const filteredApps = (applications || []).filter(a => {
     const matchSearch =
-      a.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (a.notes && a.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+      !q ||
+      (a.company || '').toLowerCase().includes(q) ||
+      (a.jobTitle || '').toLowerCase().includes(q) ||
+      ((a.notes || '').toLowerCase().includes(q));
 
     const matchStatus = statusFilter === 'all' || a.status === statusFilter;
 
