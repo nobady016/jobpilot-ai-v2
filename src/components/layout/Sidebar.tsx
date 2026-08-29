@@ -13,7 +13,8 @@ import {
   ShieldAlert,
   Send,
   Zap,
-  Laptop
+  Laptop,
+  Mail
 } from 'lucide-react';
 import { useApp, AppView } from '../../context/AppContext';
 
@@ -25,7 +26,7 @@ interface SidebarItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { currentView, setCurrentView, applications, reminders, jobs } = useApp();
+  const { currentView, setCurrentView, applications, reminders, jobs, recruiterMessages } = useApp();
 
   const activeAppsCount = applications.filter(a =>
     ['applied', 'interview', 'assessment', 'offer'].includes(a.status)
@@ -33,10 +34,12 @@ export const Sidebar: React.FC = () => {
 
   const pendingRemindersCount = reminders.filter(r => !r.completed).length;
   const savedJobsCount = jobs.filter(j => j.isSaved).length;
+  const unreadRecruiterCount = recruiterMessages.filter(m => !m.read).length;
 
   const mainNav: SidebarItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'auto-apply', label: 'Auto-Apply Bot', icon: Zap, badge: '10-15/day' },
+    { id: 'recruiter-inbox', label: 'Recruiter Replies', icon: Mail, badge: unreadRecruiterCount ? `${unreadRecruiterCount} New` : undefined },
     { id: 'jobs', label: 'Find Jobs', icon: Compass, badge: jobs.length },
     { id: 'applications-tracker', label: 'Applications', icon: Briefcase, badge: activeAppsCount || undefined },
     { id: 'resume-tailor', label: 'Resume Tailor', icon: Sparkles },

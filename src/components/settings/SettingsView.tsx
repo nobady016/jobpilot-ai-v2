@@ -49,7 +49,9 @@ export const SettingsView: React.FC = () => {
     autoTailor: jobPreferences?.autoTailorResume ?? true,
     autoApplyEnabled: jobPreferences?.autoApplyEnabled ?? true,
     autoApplyDailyTarget: jobPreferences?.autoApplyDailyTarget || 12,
-    autoApplyMinMatchScore: jobPreferences?.autoApplyMinMatchScore || 85
+    autoApplyMinMatchScore: jobPreferences?.autoApplyMinMatchScore || 85,
+    forwardDestinationEmail: jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com',
+    instantEmailAlertOnRecruiterReply: jobPreferences?.instantEmailAlertOnRecruiterReply ?? true
   });
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -68,7 +70,9 @@ export const SettingsView: React.FC = () => {
       autoTailorResume: prefForm.autoTailor,
       autoApplyEnabled: prefForm.autoApplyEnabled,
       autoApplyDailyTarget: Number(prefForm.autoApplyDailyTarget),
-      autoApplyMinMatchScore: Number(prefForm.autoApplyMinMatchScore)
+      autoApplyMinMatchScore: Number(prefForm.autoApplyMinMatchScore),
+      forwardDestinationEmail: prefForm.forwardDestinationEmail,
+      instantEmailAlertOnRecruiterReply: prefForm.instantEmailAlertOnRecruiterReply
     });
   };
 
@@ -291,6 +295,22 @@ export const SettingsView: React.FC = () => {
                 onChange={e => setPrefForm({ ...prefForm, autoApplyMinMatchScore: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100"
               />
+            </div>
+
+            <div className="sm:col-span-2 pt-3 border-t border-slate-800/80">
+              <label className="text-slate-200 font-bold block mb-1">
+                Recruiter Reply Forwarding Email Target (Immediate Alert)
+              </label>
+              <input
+                type="email"
+                value={prefForm.forwardDestinationEmail}
+                onChange={e => setPrefForm({ ...prefForm, forwardDestinationEmail: e.target.value })}
+                placeholder="nobady016@gmail.com"
+                className="w-full px-3 py-2.5 bg-slate-950 border border-indigo-500/40 rounded-xl text-slate-100 font-mono text-xs focus:outline-none focus:border-indigo-400"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                When a recruiter responds or invites you to interview, the complete message, sender contact, and suggested human reply are dispatched immediately to this address.
+              </p>
             </div>
           </div>
         </form>

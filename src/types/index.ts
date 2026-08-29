@@ -97,6 +97,39 @@ export interface JobPreferences {
   autoApplyHumanToneOnly?: boolean;
   lastAutonomousRun?: string;
   todayAppliedCount?: number;
+  // Recruiter Inbound Reply & Email Forwarding
+  instantEmailAlertOnRecruiterReply?: boolean;
+  forwardDestinationEmail?: string;
+  autoDraftReplies?: boolean;
+}
+
+export interface RecruiterMessage {
+  id: string;
+  applicationId: string;
+  jobId?: string;
+  company: string;
+  jobTitle: string;
+  senderName: string;
+  senderRole: string;
+  senderEmail: string;
+  subject: string;
+  snippet: string;
+  body: string;
+  receivedAt: string;
+  messageType: 'interview_invite' | 'screening_call' | 'assessment_link' | 'status_update' | 'offer_letter' | 'rejection';
+  sentiment: 'positive' | 'urgent' | 'informational' | 'neutral';
+  forwardedToUserEmail: string;
+  forwardStatus: 'delivered' | 'pending' | 'sent';
+  forwardedAt: string;
+  read: boolean;
+  candidateReplied?: boolean;
+  candidateReplyText?: string;
+  candidateRepliedAt?: string;
+  suggestedReply?: {
+    subject: string;
+    body: string;
+    tone: 'enthusiastic' | 'professional' | 'concise';
+  };
 }
 
 export interface AutonomousApplyLog {

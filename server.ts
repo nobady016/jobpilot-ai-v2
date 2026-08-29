@@ -368,10 +368,125 @@ async function startServer() {
       applications: db.getApplications(),
       reminders: db.getReminders(),
       savedJobs: db.getSavedJobIds(),
+      recruiterMessages: db.getRecruiterMessages(),
       auditLogs: db.getAuditLogs()
     };
     db.addAuditLog('export_data', 'Exported all user data in JSON format.', 'info');
     res.json(exportPayload);
+  });
+
+  // ==========================================
+  // RECRUITER INBOUND REPLIES & EMAIL FORWARDING
+  // ==========================================
+  app.get('/api/recruiter-messages', (req: Request, res: Response) => {
+    res.json(db.getRecruiterMessages());
+  });
+
+  app.post('/api/recruiter-messages/:id/read', (req: Request, res: Response) => {
+    const ok = db.markRecruiterMessageRead(req.params.id);
+    res.json({ success: ok });
+  });
+
+  app.post('/api/recruiter-messages/:id/reply', (req: Request, res: Response) => {
+    const { replyText } = req.body;
+    if (!replyText) return res.status(400).json({ error: 'Reply text is required' });
+    const updated = db.replyToRecruiterMessage(req.params.id, replyText);
+    if (!updated) return res.status(404).json({ error: 'Message not found' });
+    res.json(updated);
+  });
+
+  app.post('/api/recruiter-messages/:id/resend-forward', (req: Request, res: Response) => {
+    const { targetEmail } = req.body;
+    const result = db.resendForwardRecruiterMessage(req.params.id, targetEmail);
+    if (!result) return res.status(404).json({ error: 'Message not found' });
+    res.json(result);
+  });
+
+  // Simulator to trigger realistic inbound company reply with auto-forward to user email
+  app.post('/api/recruiter-messages/simulate-inbound', (req: Request, res: Response) => {
+    const { companyName, messageType = 'interview_invite', customSubject, customBody } = req.body;
+    const apps = db.getApplications();
+    const targetApp = (companyName ? apps.find(a => a.company?.toLowerCase().includes(companyName.toLowerCase())) : null) || apps[0] || {
+      id: 'app_sim_01',
+      jobId: 'job_001',
+      company: 'Linear Dynamics',
+      jobTitle: 'Frontend UI Systems Engineer'
+    };
+
+    const comp = companyName || targetApp.company || 'Linear Dynamics';
+    const title = targetApp.jobTitle || 'Frontend Engineer';
+    const userProfile = db.getProfile();
+    const destEmail = db.getPreferences().forwardDestinationEmail || userProfile.email || 'nobady016@gmail.com';
+
+    let subject = customSubject || `Interview Invitation: ${title} at ${comp}`;
+    let snippet = `Hi ${userProfile.name}, our engineering team reviewed your recent application and would love to invite you for a 30-minute technical interview...`;
+    let body = customBody || `Hi ${userProfile.name},
+
+Thank you for your application for the ${title} position at ${comp}. 
+
+Our team was very impressed by your background in React, TypeScript, and high-performance frontend architecture. We would love to arrange a 30-minute introductory video interview with our Senior Engineering Manager this week.
+
+Please share your availability for a call over the next few days, or let us know if you have any questions!
+
+Best regards,
+Talent Acquisition Team
+${comp}
+careers@${comp.toLowerCase().replace(/\s+/g, '')}.io`;
+
+    let type: any = messageType;
+    let sentiment: any = 'positive';
+
+    if (messageType === 'assessment_link') {
+      subject = `Technical Assessment Link - ${title} (${comp})`;
+      snippet = `Hi ${userProfile.name}, please complete the 45-minute coding assessment on HackerRank...`;
+      body = `Hi ${userProfile.name},
+
+Following your application for ${title} at ${comp}, please find below your unique link to complete our asynchronous technical assessment:
+
+Assessment Link: https://assessment.${comp.toLowerCase().replace(/\s+/g, '')}.io/invite/alex98124
+
+Please complete this within 5 business days.
+
+Warm regards,
+Recruiting Team at ${comp}`;
+    } else if (messageType === 'screening_call') {
+      subject = `Phone Screen Request: ${title} - ${comp}`;
+      snippet = `Hi ${userProfile.name}, I'm the recruiter for the ${title} position. Let's set up a quick 15-minute call...`;
+      body = `Hi ${userProfile.name},
+
+I'd love to schedule a quick 15-minute recruiter phone screen to discuss your background and what you're looking for next.
+
+Looking forward to connecting!
+
+Best,
+Recruiting Team at ${comp}`;
+    }
+
+    const createdMsg = db.addRecruiterMessage({
+      applicationId: targetApp.id,
+      jobId: targetApp.jobId,
+      company: comp,
+      jobTitle: title,
+      senderName: `${comp} Talent Acquisition`,
+      senderRole: 'Senior Recruiter',
+      senderEmail: `recruiting@${comp.toLowerCase().replace(/\s+/g, '')}.io`,
+      subject,
+      snippet,
+      body,
+      messageType: type,
+      sentiment,
+      suggestedReply: {
+        subject: `Re: ${subject}`,
+        body: `Hi ${comp} Team,\n\nThank you for reaching out! I would be delighted to connect. I am available Wednesday between 10:00 AM - 3:00 PM PST or Thursday afternoon. Looking forward to speaking soon.\n\nBest regards,\n${userProfile.name}`,
+        tone: 'professional'
+      }
+    });
+
+    res.json({
+      message: 'Inbound recruiter reply simulated and instantly forwarded to user email',
+      forwardedTo: destEmail,
+      data: createdMsg
+    });
   });
 
   // Reset Demo

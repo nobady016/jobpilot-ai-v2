@@ -12,7 +12,8 @@ import {
   TailoredResumeResult,
   CoverLetter,
   ApplicationStatus,
-  AutonomousApplyLog
+  AutonomousApplyLog,
+  RecruiterMessage
 } from '../types';
 import {
   INITIAL_USER_PROFILE,
@@ -24,6 +25,7 @@ import {
   INITIAL_NOTIFICATIONS,
   INITIAL_CAREER_INSIGHT,
   INITIAL_AUDIT_LOGS,
+  INITIAL_RECRUITER_MESSAGES,
   PRECOMPUTED_ANALYSES
 } from '../data/seedData';
 
@@ -815,6 +817,107 @@ export const api = {
           reminders: getStorageItem<ReminderItem[]>('reminders', INITIAL_REMINDERS),
           notifications: getStorageItem<NotificationItem[]>('notifications', INITIAL_NOTIFICATIONS),
           exportDate: new Date().toISOString()
+        };
+      }
+    );
+  },
+
+  // Recruiter Inbound Messages & Email Forwarding
+  getRecruiterMessages: async (): Promise<RecruiterMessage[]> => {
+    return safeFetch<RecruiterMessage[]>(
+      '/api/recruiter-messages',
+      undefined,
+      () => getStorageItem<RecruiterMessage[]>('recruiter_messages', INITIAL_RECRUITER_MESSAGES)
+    );
+  },
+
+  markRecruiterMessageRead: async (id: string): Promise<boolean> => {
+    return safeFetch<{ success: boolean }>(
+      `/api/recruiter-messages/${id}/read`,
+      { method: 'POST' },
+      () => {
+        const msgs = getStorageItem<RecruiterMessage[]>('recruiter_messages', INITIAL_RECRUITER_MESSAGES);
+        const m = msgs.find(item => item.id === id);
+        if (m) {
+          m.read = true;
+          setStorageItem('recruiter_messages', msgs);
+        }
+        return { success: true };
+      }
+    ).then(res => res.success);
+  },
+
+  replyToRecruiterMessage: async (id: string, replyText: string): Promise<RecruiterMessage> => {
+    return safeFetch<RecruiterMessage>(
+      `/api/recruiter-messages/${id}/reply`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replyText }),
+      },
+      () => {
+        const msgs = getStorageItem<RecruiterMessage[]>('recruiter_messages', INITIAL_RECRUITER_MESSAGES);
+        const m = msgs.find(item => item.id === id) || msgs[0];
+        m.candidateReplied = true;
+        m.candidateReplyText = replyText;
+        m.candidateRepliedAt = new Date().toISOString();
+        setStorageItem('recruiter_messages', msgs);
+        return m;
+      }
+    );
+  },
+
+  resendForwardRecruiterMessage: async (id: string, targetEmail?: string): Promise<{ success: boolean; deliveredTo: string }> => {
+    return safeFetch<{ success: boolean; deliveredTo: string }>(
+      `/api/recruiter-messages/${id}/resend-forward`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetEmail }),
+      },
+      () => {
+        return { success: true, deliveredTo: targetEmail || 'nobady016@gmail.com' };
+      }
+    );
+  },
+
+  simulateInboundRecruiterReply: async (params?: { companyName?: string; messageType?: string; customSubject?: string; customBody?: string }): Promise<{ message: string; forwardedTo: string; data: RecruiterMessage }> => {
+    return safeFetch<{ message: string; forwardedTo: string; data: RecruiterMessage }>(
+      '/api/recruiter-messages/simulate-inbound',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params || {}),
+      },
+      () => {
+        const now = new Date().toISOString();
+        const dummy: RecruiterMessage = {
+          id: `msg_sim_${Date.now()}`,
+          applicationId: 'app_01',
+          jobId: 'job_001',
+          company: params?.companyName || 'Linear Dynamics',
+          jobTitle: 'Frontend UI Systems Engineer',
+          senderName: 'Linear Recruiting',
+          senderRole: 'Talent Acquisition Partner',
+          senderEmail: 'recruiting@linear.app',
+          subject: params?.customSubject || 'Interview Invitation: Frontend UI Systems Engineer',
+          snippet: 'Hi Alex, we reviewed your application and would love to arrange a technical video call...',
+          body: `Hi Alex,\n\nWe were impressed with your application and would like to schedule an introductory video screening.\n\nBest regards,\nLinear Recruiting`,
+          receivedAt: now,
+          messageType: 'interview_invite',
+          sentiment: 'positive',
+          forwardedToUserEmail: 'nobady016@gmail.com',
+          forwardStatus: 'delivered',
+          forwardedAt: now,
+          read: false
+        };
+        const msgs = getStorageItem<RecruiterMessage[]>('recruiter_messages', INITIAL_RECRUITER_MESSAGES);
+        msgs.unshift(dummy);
+        setStorageItem('recruiter_messages', msgs);
+        return {
+          message: 'Inbound recruiter reply simulated and instantly forwarded to user email',
+          forwardedTo: 'nobady016@gmail.com',
+          data: dummy
         };
       }
     );

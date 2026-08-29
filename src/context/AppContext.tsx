@@ -12,7 +12,8 @@ import {
   AIJobAnalysis,
   TailoredResumeResult,
   CoverLetter,
-  ApplicationStatus
+  ApplicationStatus,
+  RecruiterMessage
 } from '../types';
 import { api } from '../services/apiClient';
 
@@ -23,6 +24,7 @@ export type AppView =
   | 'jobs'
   | 'job-detail'
   | 'auto-apply'
+  | 'recruiter-inbox'
   | 'resume-tailor'
   | 'resume-builder'
   | 'cover-letter'
@@ -53,6 +55,7 @@ interface AppContextType {
   applications: ApplicationRecord[];
   reminders: ReminderItem[];
   notifications: NotificationItem[];
+  recruiterMessages: RecruiterMessage[];
   careerInsights: CareerInsight | null;
   auditLogs: AuditLog[];
   dashboardStats: any;
@@ -78,6 +81,10 @@ interface AppContextType {
   toggleReminder: (remId: string) => Promise<void>;
   markNotificationRead: (notifId: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
+  markRecruiterMessageRead: (msgId: string) => Promise<void>;
+  replyToRecruiterMessage: (msgId: string, replyText: string) => Promise<void>;
+  resendForwardRecruiterMessage: (msgId: string, targetEmail?: string) => Promise<void>;
+  simulateRecruiterReply: (params?: { companyName?: string; messageType?: string; customSubject?: string; customBody?: string }) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -91,6 +98,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [reminders, setReminders] = useState<ReminderItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [recruiterMessages, setRecruiterMessages] = useState<RecruiterMessage[]>([]);
   const [careerInsights, setCareerInsights] = useState<CareerInsight | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
@@ -125,6 +133,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         appsList,
         remsList,
         notifsList,
+        msgsList,
         insights,
         stats,
         logs
@@ -136,6 +145,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         api.getApplications(),
         api.getReminders(),
         api.getNotifications(),
+        api.getRecruiterMessages(),
         api.getCareerInsights(),
         api.getDashboardStats(),
         api.getAuditLogs()
@@ -148,6 +158,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setApplications(appsList);
       setReminders(remsList);
       setNotifications(notifsList);
+      setRecruiterMessages(msgsList);
       setCareerInsights(insights);
       setDashboardStats(stats);
       setAuditLogs(logs);
@@ -260,6 +271,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addToast('info', 'All notifications marked as read');
   };
 
+  const markRecruiterMessageRead = async (msgId: string) => {
+    await api.markRecruiterMessageRead(msgId);
+    setRecruiterMessages(prev =>
+      prev.map(m => (m.id === msgId ? { ...m, read: true } : m))
+    );
+  };
+
+  const replyToRecruiterMessage = async (msgId: string, replyText: string) => {
+    try {
+      const updated = await api.replyToRecruiterMessage(msgId, replyText);
+      setRecruiterMessages(prev =>
+        prev.map(m => (m.id === msgId ? updated : m))
+      );
+      addToast('success', 'Response Dispatched', `Your reply was sent to ${updated.senderName} (${updated.company}).`);
+    } catch (err: any) {
+      addToast('error', 'Failed to Send Reply', err.message);
+    }
+  };
+
+  const resendForwardRecruiterMessage = async (msgId: string, targetEmail?: string) => {
+    try {
+      const res = await api.resendForwardRecruiterMessage(msgId, targetEmail);
+      addToast('success', 'Forward Delivered', `Company reply forwarded to ${res.deliveredTo}`);
+      const msgs = await api.getRecruiterMessages();
+      setRecruiterMessages(msgs);
+    } catch (err: any) {
+      addToast('error', 'Forwarding Failed', err.message);
+    }
+  };
+
+  const simulateRecruiterReply = async (params?: { companyName?: string; messageType?: string; customSubject?: string; customBody?: string }) => {
+    try {
+      const res = await api.simulateInboundRecruiterReply(params);
+      addToast('success', '⚡ Inbound Recruiter Reply Received!', `Forwarded immediately to ${res.forwardedTo}`);
+      await refreshData();
+    } catch (err: any) {
+      addToast('error', 'Simulation Failed', err.message);
+    }
+  };
+
   const selectedJob = selectedJobId ? jobs.find(j => j.id === selectedJobId) || null : null;
 
   return (
@@ -274,6 +325,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         applications,
         reminders,
         notifications,
+        recruiterMessages,
         careerInsights,
         auditLogs,
         dashboardStats,
@@ -299,6 +351,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleReminder,
         markNotificationRead,
         markAllNotificationsRead,
+        markRecruiterMessageRead,
+        replyToRecruiterMessage,
+        resendForwardRecruiterMessage,
+        simulateRecruiterReply,
       }}
     >
       {children}
@@ -313,3 +369,4 @@ export const useApp = () => {
   }
   return context;
 };
+

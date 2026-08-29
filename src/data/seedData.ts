@@ -8,7 +8,8 @@ import {
   NotificationItem,
   CareerInsight,
   AuditLog,
-  AIJobAnalysis
+  AIJobAnalysis,
+  RecruiterMessage
 } from '../types';
 
 export const INITIAL_USER_PROFILE: UserProfile = {
@@ -154,7 +155,10 @@ export const INITIAL_JOB_PREFERENCES: JobPreferences = {
   autoApplyNotifyEmail: true,
   autoApplyHumanToneOnly: true,
   lastAutonomousRun: '2026-08-29T08:00:00Z',
-  todayAppliedCount: 12
+  todayAppliedCount: 12,
+  instantEmailAlertOnRecruiterReply: true,
+  forwardDestinationEmail: 'nobady016@gmail.com',
+  autoDraftReplies: true
 };
 
 export const INITIAL_RESUME_VERSIONS: ResumeVersion[] = [
@@ -1001,3 +1005,94 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     status: 'info'
   }
 ];
+
+export const INITIAL_RECRUITER_MESSAGES: RecruiterMessage[] = [
+  {
+    id: 'msg_rec_01',
+    applicationId: 'app_01',
+    jobId: 'job_001',
+    company: 'Starlight Tech',
+    jobTitle: 'Frontend Developer (React / TypeScript)',
+    senderName: 'Claire Vance',
+    senderRole: 'Senior Talent Partner',
+    senderEmail: 'claire.vance@starlighttech.io',
+    subject: 'Interview Invitation: Frontend Developer at Starlight Tech',
+    snippet: 'Hi Alex, we reviewed your tailored application and were very impressed with your TypeScript and React projects. We would love to schedule a 30-minute introductory video call...',
+    body: `Hi Alex,
+
+Thank you for applying to the Frontend Developer role at Starlight Tech! 
+
+Our engineering leadership reviewed your resume and project portfolio, particularly your work with scalable React components and clean TypeScript architectures. We would love to move forward with a 30-minute introductory technical screening video call this week.
+
+Could you let us know your availability over the next few days (Tuesday through Thursday between 10:00 AM - 4:00 PM PST)?
+
+Looking forward to speaking with you!
+
+Warm regards,
+Claire Vance
+Senior Talent Acquisition Partner | Starlight Tech
+claire.vance@starlighttech.io`,
+    receivedAt: '2026-08-29T09:15:00Z',
+    messageType: 'interview_invite',
+    sentiment: 'positive',
+    forwardedToUserEmail: 'nobady016@gmail.com',
+    forwardStatus: 'delivered',
+    forwardedAt: '2026-08-29T09:15:05Z',
+    read: false,
+    suggestedReply: {
+      subject: 'Re: Interview Invitation: Frontend Developer at Starlight Tech',
+      body: `Hi Claire,
+
+Thank you for reaching out! I'm thrilled to hear the team's feedback and would love to connect for the introductory video screening.
+
+I am available Wednesday at 11:00 AM PST or Thursday at 2:00 PM PST. Please let me know if either of those time slots works for your calendar.
+
+Best regards,
+Alex Mercer`,
+      tone: 'professional'
+    }
+  },
+  {
+    id: 'msg_rec_02',
+    applicationId: 'app_02',
+    jobId: 'job_002',
+    company: 'Apex Cloud Solutions',
+    jobTitle: 'Full Stack Engineer (Node.js & React)',
+    senderName: 'Marcus Reynolds',
+    senderRole: 'Technical Hiring Manager',
+    senderEmail: 'marcus.reynolds@apexcloud.co',
+    subject: 'Apex Cloud: Next Steps - Short Technical Assessment Link',
+    snippet: 'Hello Alex, following up on your application. We would like to invite you to complete a 45-minute asynchronous TypeScript coding challenge...',
+    body: `Hello Alex,
+
+Thank you for your interest in Apex Cloud Solutions. We were impressed with your background in Node.js backend services and React state patterns.
+
+As a next step in our interview process, we invite you to complete a brief 45-minute practical TypeScript assessment on CodeSignal. You can complete it whenever convenient within the next 5 days.
+
+Assessment Link: https://app.codesignal.com/invite/apex-cloud-eng-98124
+
+Please let us know if you have any questions or accommodation requests.
+
+Best,
+Marcus Reynolds
+Apex Cloud Solutions Engineering Team`,
+    receivedAt: '2026-08-28T16:40:00Z',
+    messageType: 'assessment_link',
+    sentiment: 'positive',
+    forwardedToUserEmail: 'nobady016@gmail.com',
+    forwardStatus: 'delivered',
+    forwardedAt: '2026-08-28T16:40:06Z',
+    read: true,
+    suggestedReply: {
+      subject: 'Re: Apex Cloud: Next Steps - Short Technical Assessment Link',
+      body: `Hi Marcus,
+
+Thank you for the update and the assessment link. I have received the details and will complete the challenge by tomorrow afternoon.
+
+Best regards,
+Alex Mercer`,
+      tone: 'professional'
+    }
+  }
+];
+

@@ -12,7 +12,9 @@ import {
   Zap,
   Check,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Mail,
+  Forward
 } from 'lucide-react';
 import {
   AreaChart,
@@ -32,6 +34,8 @@ export const MainDashboard: React.FC = () => {
     jobs,
     applications,
     reminders,
+    recruiterMessages,
+    jobPreferences,
     toggleReminder,
     setCurrentView,
     setSelectedJobId,
@@ -49,6 +53,8 @@ export const MainDashboard: React.FC = () => {
 
   const strongMatches = jobs.filter(j => j.matchScore >= 85).slice(0, 3);
   const activeReminders = reminders.filter(r => !r.completed);
+  const unreadRecruiterCount = recruiterMessages.filter(m => !m.read).length;
+  const forwardEmail = jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com';
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-200">
@@ -104,6 +110,38 @@ export const MainDashboard: React.FC = () => {
         >
           <span>Manage Automation</span>
           <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Recruiter Response & Forwarding Live Alert Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <Mail className="w-5 h-5 text-indigo-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-100">Recruiter Reply Auto-Forwarder</span>
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                {forwardEmail}
+              </span>
+              {unreadRecruiterCount > 0 && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  {unreadRecruiterCount} New Reply Received
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Whenever a company responds to your applications, the full email &amp; interview invite are forwarded to <strong className="text-slate-200 font-mono">{forwardEmail}</strong>.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setCurrentView('recruiter-inbox')}
+          className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all shrink-0 flex items-center gap-1.5 self-start sm:self-auto"
+        >
+          <Forward className="w-3.5 h-3.5" />
+          <span>View Inbound Replies ({recruiterMessages.length})</span>
         </button>
       </div>
 

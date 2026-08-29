@@ -103,7 +103,16 @@ export const Header: React.FC = () => {
                   notifications.map(n => (
                     <div
                       key={n.id}
-                      onClick={() => markNotificationRead(n.id)}
+                      onClick={() => {
+                        markNotificationRead(n.id);
+                        if (n.link?.includes('recruiter') || n.title.toLowerCase().includes('reply') || n.title.toLowerCase().includes('recruiter')) {
+                          setCurrentView('recruiter-inbox');
+                          setIsNotifOpen(false);
+                        } else if (n.link?.includes('applications')) {
+                          setCurrentView('applications-tracker');
+                          setIsNotifOpen(false);
+                        }
+                      }}
                       className={`p-3 rounded-xl cursor-pointer transition-colors ${
                         n.read ? 'hover:bg-slate-800/40 opacity-75' : 'bg-slate-800/50 hover:bg-slate-800'
                       }`}

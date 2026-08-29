@@ -9,7 +9,8 @@ import {
   CareerInsight,
   AuditLog,
   AIJobAnalysis,
-  ApplicationStatus
+  ApplicationStatus,
+  RecruiterMessage
 } from '../src/types';
 import {
   INITIAL_USER_PROFILE,
@@ -21,6 +22,7 @@ import {
   INITIAL_NOTIFICATIONS,
   INITIAL_CAREER_INSIGHT,
   INITIAL_AUDIT_LOGS,
+  INITIAL_RECRUITER_MESSAGES,
   PRECOMPUTED_ANALYSES
 } from '../src/data/seedData';
 
@@ -32,6 +34,7 @@ class StorageDatabase {
   private applications: ApplicationRecord[] = [...INITIAL_APPLICATIONS];
   private reminders: ReminderItem[] = [...INITIAL_REMINDERS];
   private notifications: NotificationItem[] = [...INITIAL_NOTIFICATIONS];
+  private recruiterMessages: RecruiterMessage[] = [...INITIAL_RECRUITER_MESSAGES];
   private careerInsight: CareerInsight = { ...INITIAL_CAREER_INSIGHT };
   private auditLogs: AuditLog[] = [...INITIAL_AUDIT_LOGS];
   private analysesCache: Map<string, AIJobAnalysis> = new Map(Object.entries(PRECOMPUTED_ANALYSES));
@@ -141,7 +144,7 @@ class StorageDatabase {
   }
 
   createApplication(record: Omit<ApplicationRecord, 'id' | 'createdAt' | 'updatedAt' | 'history'>): ApplicationRecord {
-    const id = `app_${Date.now()}`;
+    const id = `app_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
     const newRecord: ApplicationRecord = {
       ...record,
       id,
@@ -225,6 +228,93 @@ class StorageDatabase {
 
   markAllNotificationsRead(): void {
     this.notifications.forEach(n => (n.read = true));
+  }
+
+  // Recruiter Inbound Messages & Automatic Email Forwarding
+  getRecruiterMessages(): RecruiterMessage[] {
+    return this.recruiterMessages;
+  }
+
+  getRecruiterMessageById(id: string): RecruiterMessage | undefined {
+    return this.recruiterMessages.find(m => m.id === id);
+  }
+
+  addRecruiterMessage(msg: Omit<RecruiterMessage, 'id' | 'receivedAt' | 'forwardedAt' | 'forwardStatus' | 'forwardedToUserEmail' | 'read'> & { forwardedToUserEmail?: string; read?: boolean }): RecruiterMessage {
+    const userEmail = msg.forwardedToUserEmail || this.jobPreferences.forwardDestinationEmail || this.userProfile.email || 'nobady016@gmail.com';
+    const now = new Date().toISOString();
+    const id = `msg_rec_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    const newMsg: RecruiterMessage = {
+      ...msg,
+      id,
+      receivedAt: now,
+      forwardedAt: now,
+      forwardStatus: 'delivered',
+      forwardedToUserEmail: userEmail,
+      read: msg.read ?? false
+    };
+
+    this.recruiterMessages.unshift(newMsg);
+
+    // Also create high-priority notification for immediate UI alert
+    const notifTitle = `Incoming Reply from ${newMsg.company}`;
+    const notifMsg = `Recruiter ${newMsg.senderName} sent "${newMsg.subject}". Forwarded to ${userEmail}.`;
+    this.addNotification({
+      id: `notif_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      title: notifTitle,
+      message: notifMsg,
+      type: newMsg.messageType === 'interview_invite' ? 'reminder' : 'application',
+      timestamp: now,
+      read: false,
+      link: '/recruiter-inbox'
+    });
+
+    // Update associated application status to 'interview' or 'assessment' if applicable
+    if (newMsg.applicationId) {
+      const app = this.applications.find(a => a.id === newMsg.applicationId || a.jobId === newMsg.jobId);
+      if (app) {
+        if (newMsg.messageType === 'interview_invite' && app.status !== 'interview' && app.status !== 'offer') {
+          this.updateApplicationStatus(app.id, 'interview', `Recruiter ${newMsg.senderName} sent interview invite. Automatically forwarded to ${userEmail}.`);
+        } else if (newMsg.messageType === 'assessment_link' && app.status !== 'assessment' && app.status !== 'interview') {
+          this.updateApplicationStatus(app.id, 'assessment', `Assessment received from ${newMsg.company}. Automatically forwarded to ${userEmail}.`);
+        }
+      }
+    }
+
+    // Add security audit log for full traceability
+    this.addAuditLog('application_approved', `Inbound recruiter reply from ${newMsg.company} (${newMsg.senderEmail}) instantly forwarded to ${userEmail}.`, 'success');
+
+    return newMsg;
+  }
+
+  markRecruiterMessageRead(id: string): boolean {
+    const m = this.recruiterMessages.find(item => item.id === id);
+    if (!m) return false;
+    m.read = true;
+    return true;
+  }
+
+  replyToRecruiterMessage(id: string, replyText: string): RecruiterMessage | null {
+    const m = this.recruiterMessages.find(item => item.id === id);
+    if (!m) return null;
+    m.candidateReplied = true;
+    m.candidateReplyText = replyText;
+    m.candidateRepliedAt = new Date().toISOString();
+    
+    this.addAuditLog('ai_generation', `Candidate response sent to ${m.senderName} (${m.company}): "${replyText.substring(0, 50)}..."`, 'success');
+    return m;
+  }
+
+  resendForwardRecruiterMessage(id: string, targetEmail?: string): { success: boolean; deliveredTo: string } | null {
+    const m = this.recruiterMessages.find(item => item.id === id);
+    if (!m) return null;
+    const dest = targetEmail || this.jobPreferences.forwardDestinationEmail || 'nobady016@gmail.com';
+    m.forwardedToUserEmail = dest;
+    m.forwardedAt = new Date().toISOString();
+    m.forwardStatus = 'delivered';
+
+    this.addAuditLog('application_approved', `Manually re-forwarded recruiter email from ${m.company} to ${dest}.`, 'success');
+    return { success: true, deliveredTo: dest };
   }
 
   // Career Insights

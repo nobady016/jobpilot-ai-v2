@@ -23,9 +23,10 @@ import { ExtensionSimulatorView } from './components/extension/ExtensionSimulato
 import { AdminView } from './components/admin/AdminView';
 import { SettingsView } from './components/settings/SettingsView';
 import { AutonomousApplyView } from './components/auto-apply/AutonomousApplyView';
+import { RecruiterInboxView } from './components/recruiter/RecruiterInboxView';
 
 const MainLayout: React.FC = () => {
-  const { currentView, isLoading } = useApp();
+  const { currentView } = useApp();
 
   if (currentView === 'landing') {
     return (
@@ -51,6 +52,8 @@ const MainLayout: React.FC = () => {
         return <MainDashboard />;
       case 'auto-apply':
         return <AutonomousApplyView />;
+      case 'recruiter-inbox':
+        return <RecruiterInboxView />;
       case 'jobs':
         return <JobsExplorer />;
       case 'job-detail':
@@ -70,6 +73,7 @@ const MainLayout: React.FC = () => {
       case 'analytics':
         return <AnalyticsView />;
       case 'insights':
+      case 'career-insights':
         return <CareerInsightsView />;
       case 'reminders':
         return <RemindersView />;
