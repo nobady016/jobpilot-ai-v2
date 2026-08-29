@@ -525,56 +525,58 @@ Return ONLY valid JSON matching this schema:
   }
 
   /**
-   * Truthful Cover Letter Generation
+   * Truthful Cover Letter Generation - 100% Human-sounding, Natural Voice
    */
   static async generateCoverLetter(
     userProfile: any,
     job: any,
     tone: 'professional' | 'formal' | 'concise' | 'enthusiastic' = 'professional'
   ) {
-    const prompt = `You are an authentic Cover Letter generator for JobPilot AI.
-Generate a tailored, compelling cover letter for the candidate applying to "${job.title}" at "${job.company}".
-Tone: ${tone}
+    const prompt = `You are writing a cover letter on behalf of an experienced professional applicant applying for "${job.title}" at "${job.company}".
+Tone style: ${tone}
 
-RULES:
-- Reference candidate's REAL verified background: (${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, ${(userProfile.skills || []).slice(0, 5).join(', ')}).
-- Address how their specific experience solves the challenges in "${job.title}".
-- NEVER fabricate skills, projects, or achievements.
-- Structure:
-  1. Professional greeting & clear statement of intent
-  2. Concrete demonstration of relevant technical problem-solving with verified experience
-  3. Alignment with company mission / engineering ethos
-  4. Confident closing & interview availability
+IMPORTANT STYLE & HUMANIZATION RULES (Recruiter Anti-AI Guidelines):
+- MUST SOUND 100% HUMAN, AUTHENTIC, AND NATURAL.
+- NEVER use generic AI clichés, buzzwords, or robotic phrases like:
+  * "I am thrilled / delighted / ecstatic to apply..."
+  * "In today's fast-paced digital world..."
+  * "A proven track record of synergy and innovation..."
+  * "Leveraging my multifaceted skillset..."
+  * "Spearheaded end-to-end paradigms..."
+- Write like a thoughtful, experienced engineer/professional talking directly to another colleague or hiring manager.
+- Be grounded, confident, warm, and concise.
+- Reference candidate's REAL verified background only: (${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, ${(userProfile.skills || []).slice(0, 5).join(', ')}).
+- Focus on concrete situations: what they built, how they approached tricky problems, and why this particular team at ${job.company} caught their attention.
+- Structure naturally with realistic paragraph transitions.
+- Close simply with appreciation for their time and interest in discussing the work.
 
-Return ONLY the plain text of the cover letter with proper spacing.`;
+Return ONLY the plain text of the human cover letter with proper spacing.`;
 
     const rawResponse = await callGeminiWithFallback(prompt, {
-      temperature: 0.3,
+      temperature: 0.7,
     });
 
     if (rawResponse) {
       return rawResponse.trim();
     }
 
-    // Deterministic high-standard cover letter
-    return `Dear Hiring Team at ${job.company},
+    // High quality deterministic authentic human letter
+    return `Hi ${job.company} Hiring Team,
 
-I am writing to express my strong enthusiasm for the ${job.title} position at ${job.company}. With over 3.5 years of practical experience building resilient full-stack web applications with ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 4).join(', ')}, I am excited to contribute to your engineering objectives.
+I'm writing to share my background for the ${job.title} role. Over the past 3.5+ years, I've spent most of my time building reliable web applications—focusing closely on ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 3).join(', ')} and clean UI architecture.
 
-In my current role at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, I spearheaded the development of high-velocity UI component libraries and scalable REST microservices handling tens of thousands of daily requests. When reviewing the requirements for ${job.title}, I was particularly drawn to your focus on ${(job.requiredSkills || ['React', 'TypeScript']).slice(0, 2).join(' and ')}—areas where I have consistently delivered measurable performance gains and clean, maintainable architecture.
+In my recent work at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, I led our core frontend component system and worked on backend REST endpoints that handled high daily traffic. What really drew me to ${job.company} is the practical focus on ${(job.requiredSkills || ['React', 'TypeScript']).slice(0, 2).join(' and ')}. I enjoy tackling performance bottlenecks, keeping codebases straightforward to maintain, and collaborating closely with product and design.
 
-Furthermore, my background in infrastructure automation and automated testing has reinforced my commitment to writing resilient, self-documenting code that scales gracefully across distributed teams.
+I would love the chance to connect and talk through how my past experience can help support what your team is building. Thanks so much for your time and consideration.
 
-I would welcome the opportunity to discuss how my technical skill set and pragmatic problem-solving approach align with ${job.company}'s roadmap. Thank you for your time and consideration.
-
-Sincerely,
+Best regards,
 ${userProfile.name || 'Alex Mercer'}
 ${userProfile.email || 'alex.mercer@example.com'} | ${userProfile.phone || '+1 (555) 234-8901'}
 ${userProfile.linkedinUrl || 'linkedin.com/in/alex-mercer'}`;
   }
 
   /**
-   * Safe Application Question Answering
+   * Safe Application Question Answering - 100% Natural Human Voice
    */
   static async suggestQuestionAnswer(
     question: string,
@@ -582,21 +584,27 @@ ${userProfile.linkedinUrl || 'linkedin.com/in/alex-mercer'}`;
     userProfile: any,
     job: any
   ) {
-    const prompt = `You are an Application Assistant for JobPilot AI.
-Answer the following job application question based STRICTLY on the candidate's real profile.
-If the question is about legal work authorization, sponsorship, or personal salary requirements, provide the direct factual answer from their profile.
-DO NOT guess or invent facts. If uncertain, state the verified fact and flag for review.
+    const prompt = `You are helping a candidate answer a job application question.
+Write an authentic, human-written answer that sounds like a real person typing directly into the application form.
 
-Question: "${question}"
-Category: ${category}
-Job: ${job.title} at ${job.company}
+QUESTION: "${question}"
+CATEGORY: ${category}
+ROLE: ${job.title} at ${job.company}
 
-Candidate Real Data:
+CANDIDATE'S REAL DATA:
 - Work Authorization: ${userProfile.workAuthorization || 'Authorized to work in US without restriction'}
 - Requires Sponsorship: ${userProfile.requireSponsorship ? 'Yes' : 'No'}
-- Desired Salary Min: $${userProfile.preferredSalaryMin || 135000}
-- Skills: ${(userProfile.skills || []).join(', ')}
-- Experience: ${(userProfile.experience || []).map((e: any) => `${e.position || e.title} at ${e.company}: ${(e.bulletPoints || e.bullets || []).join(' ')}`).join('\n')}
+- Minimum Desired Salary: $${userProfile.preferredSalaryMin || 135000}
+- Verified Skills: ${(userProfile.skills || []).join(', ')}
+- Work History: ${(userProfile.experience || []).map((e: any) => `${e.position || e.title} at ${e.company}: ${(e.bulletPoints || e.bullets || []).join(' ')}`).join('\n')}
+
+STRICT ANTI-AI & HUMAN TONE GUIDELINES:
+1. Write in natural 1st-person ("I've worked on...", "In my previous role at...", "I usually...").
+2. NEVER sound like a template or generic AI chatbot. NO robotic intros ("As an experienced...", "I possess a unique blend of...").
+3. Keep it direct, grounded, and concise (2-4 natural sentences unless a detailed story is specifically asked).
+4. Use authentic phrasing that a recruiter or engineer would naturally write.
+5. If the question asks for factual info (salary, sponsorship, location, authorization), give a direct, realistic human reply.
+6. Strictly preserve truthful facts from the candidate's real profile.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -608,7 +616,7 @@ Return ONLY valid JSON matching this schema:
 
     const rawResponse = await callGeminiWithFallback(prompt, {
       responseMimeType: 'application/json',
-      temperature: 0.1,
+      temperature: 0.6,
     });
 
     if (rawResponse) {
@@ -616,30 +624,54 @@ Return ONLY valid JSON matching this schema:
       if (parsed) return parsed;
     }
 
-    // Heuristic fallback
-    if (category === 'work_auth' || question.toLowerCase().includes('sponsorship') || question.toLowerCase().includes('authorized')) {
+    const qLower = question.toLowerCase();
+
+    // Heuristic natural human fallbacks
+    if (category === 'work_auth' || qLower.includes('sponsorship') || qLower.includes('authorized') || qLower.includes('visa')) {
+      const isAuth = !userProfile.requireSponsorship;
       return {
-        suggestedAnswer: userProfile.workAuthorization || 'Authorized to work in the US without restriction',
+        suggestedAnswer: isAuth
+          ? "I am legally authorized to work in the United States and do not require current or future visa sponsorship."
+          : "I will require visa sponsorship to work in the United States.",
         confidence: 'high',
         requiresManualReview: false,
-        reasoning: 'Derived directly from user personal work authorization settings.'
+        reasoning: 'Direct factual response from your profile authorization status.'
       };
     }
 
-    if (category === 'salary' || question.toLowerCase().includes('salary') || question.toLowerCase().includes('compensation')) {
+    if (category === 'salary' || qLower.includes('salary') || qLower.includes('compensation') || qLower.includes('expectations')) {
+      const min = userProfile.preferredSalaryMin || 135000;
       return {
-        suggestedAnswer: `$${(userProfile.preferredSalaryMin || 135000).toLocaleString()} - Open to discussing based on total compensation and benefits`,
+        suggestedAnswer: `Around $${min.toLocaleString()}, though I'm flexible and open to discussing the full package depending on benefits and growth opportunities.`,
         confidence: 'high',
         requiresManualReview: true,
-        reasoning: 'Pre-filled with candidate minimum target salary.'
+        reasoning: 'Natural human phrasing with your minimum base target.'
+      };
+    }
+
+    if (qLower.includes('excited') || qLower.includes('why') || qLower.includes('interest')) {
+      return {
+        suggestedAnswer: `I've been working extensively with ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 3).join(', ')} at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, and I really appreciate ${job.company}'s focus on engineering quality. The problems your team is solving around ${job.title} align well with what I genuinely enjoy building day-to-day.`,
+        confidence: 'high',
+        requiresManualReview: true,
+        reasoning: 'Conversational, grounded motivation linked directly to your stack.'
+      };
+    }
+
+    if (qLower.includes('experience') || qLower.includes('background') || qLower.includes('tell me about yourself')) {
+      return {
+        suggestedAnswer: `I have about 3.5 years of experience building web applications and backend services with ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 3).join(', ')}. Most recently at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, I focused on creating modular UI components and improving API response times.`,
+        confidence: 'high',
+        requiresManualReview: true,
+        reasoning: 'Concise summary of your real work history.'
       };
     }
 
     return {
-      suggestedAnswer: `Based on my 3+ years of experience working with ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 3).join(', ')} at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, I have delivered scalable solutions directly addressing this domain.`,
+      suggestedAnswer: `In my work at ${userProfile.experience?.[0]?.company || 'Apex Cloud Solutions'}, I frequently tackled similar challenges using ${(userProfile.skills || ['React', 'TypeScript', 'Node.js']).slice(0, 3).join(', ')}. I focus on writing clear, reliable code and working closely with the team to ship features smoothly.`,
       confidence: 'medium',
       requiresManualReview: true,
-      reasoning: 'Grounded suggestion created from relevant work history.'
+      reasoning: 'Grounded, human-style answer based on your recent projects.'
     };
   }
 }

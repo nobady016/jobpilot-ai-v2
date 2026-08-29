@@ -484,22 +484,27 @@ export const api = {
         const profile = getStorageItem<UserProfile>('profile', INITIAL_USER_PROFILE);
         const qLower = (question || '').toLowerCase();
         
-        let answer = `I bring 3.5+ years of software engineering experience focusing on ${profile.skills.slice(0, 3).join(', ')}.`;
-        if (qLower.includes('experience') || qLower.includes('years')) {
-          answer = 'I have over 3.5 years of professional software engineering and web application development experience.';
-        } else if (qLower.includes('salary') || qLower.includes('compensation')) {
-          answer = 'My expected salary range is $110,000 - $135,000, negotiable based on total compensation and benefits.';
-        } else if (qLower.includes('remote') || qLower.includes('location')) {
-          answer = 'I am fully equipped for remote work and open to hybrid schedules in the San Francisco Bay Area.';
+        let answer = `In my day-to-day work at Apex Cloud Solutions, I've primarily worked with ${profile.skills.slice(0, 3).join(', ')}. I focus on building reliable, clean user interfaces and making sure services scale smoothly.`;
+        if (qLower.includes('experience') || qLower.includes('years') || qLower.includes('background')) {
+          answer = `I've been building web applications and backend systems for about 3.5 years, specializing in ${profile.skills.slice(0, 3).join(', ')}. In my recent role at Apex Cloud Solutions, I led our frontend UI components and built high-traffic REST endpoints.`;
+        } else if (qLower.includes('salary') || qLower.includes('compensation') || qLower.includes('expectations')) {
+          const min = profile.preferredSalaryMin || 135000;
+          answer = `Around $${min.toLocaleString()}, though I'm flexible and open to discussing the complete compensation package.`;
+        } else if (qLower.includes('remote') || qLower.includes('location') || qLower.includes('relocate')) {
+          answer = 'I am comfortable with remote setups as well as hybrid work in the SF Bay Area.';
         } else if (qLower.includes('auth') || qLower.includes('sponsorship') || qLower.includes('visa')) {
-          answer = 'I am legally authorized to work in the United States and do not require sponsorship.';
+          answer = profile.requireSponsorship
+            ? 'I will require visa sponsorship to work in the United States.'
+            : 'I am legally authorized to work in the United States and do not require visa sponsorship.';
+        } else if (qLower.includes('excited') || qLower.includes('why') || qLower.includes('interest')) {
+          answer = `I've spent a lot of time working with ${profile.skills.slice(0, 3).join(', ')}, and I really like the engineering challenges your team is tackling. The role fits directly with the kind of scalable systems I enjoy building.`;
         }
 
         return {
           suggestedAnswer: answer,
           confidence: 'high',
           requiresManualReview: false,
-          reasoning: 'Grounded directly in candidate master profile and verified preferences.'
+          reasoning: 'Grounded directly in candidate master profile and verified experience.'
         };
       }
     );

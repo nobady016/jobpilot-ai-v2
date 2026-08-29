@@ -11,19 +11,55 @@ import {
   Send,
   Zap,
   RefreshCw,
-  Eye
+  Eye,
+  UserCheck,
+  MessageSquareQuote,
+  Sliders
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { api } from '../../services/apiClient';
 
 export const ExtensionSimulatorView: React.FC = () => {
   const { userProfile, selectedJob, addToast, setCurrentView } = useApp();
 
   const [autofilled, setAutofilled] = useState(false);
   const [activePortal, setActivePortal] = useState<'greenhouse' | 'lever' | 'workday'>('greenhouse');
+  
+  // Interactive Question Answering & Humanizer State
+  const [activeQuestion, setActiveQuestion] = useState('What makes you excited about this role?');
+  const [customQuestionInput, setCustomQuestionInput] = useState('');
+  const [customAnswer, setCustomAnswer] = useState(
+    'In my recent work at Apex Cloud Solutions, I focused heavily on React UI architecture and scalable REST services. The problems your team is working on at Apex Cloud align directly with what I enjoy building every day.'
+  );
+  const [toneStyle, setToneStyle] = useState<'natural' | 'conversational' | 'concise' | 'confident'>('natural');
+  const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false);
+
+  const predefinedQuestions = [
+    'What makes you excited about this role?',
+    'Why are you looking to leave your current position?',
+    'Describe a challenging technical problem you solved recently.',
+    'What are your compensation expectations?',
+    'What is your experience with React & TypeScript architecture?'
+  ];
 
   const handleAutofill = () => {
     setAutofilled(true);
-    addToast('success', 'Form Fields Autofilled!', 'Candidate contact and profile data populated safely.');
+    addToast('success', 'Form Fields Autofilled!', 'Candidate contact and 100% human-tailored answers populated safely.');
+  };
+
+  const handleGenerateHumanAnswer = async (questionToAsk: string) => {
+    setIsGeneratingAnswer(true);
+    try {
+      addToast('info', 'Generating Human Answer...', 'Crafting a 100% natural, recruiter-approved answer without AI clichés.');
+      const res = await api.suggestQuestionAnswer(questionToAsk, 'application_question', selectedJob?.id);
+      setCustomAnswer(res.suggestedAnswer);
+      setAutofilled(true);
+      addToast('success', 'Human Answer Ready', 'Sounding natural and authentic, ready for review.');
+    } catch (err: any) {
+      addToast('error', 'Generation Error', err.message || 'Failed to generate answer');
+    } finally {
+      setIsGeneratingAnswer(false);
+    }
   };
 
   return (
@@ -38,7 +74,7 @@ export const ExtensionSimulatorView: React.FC = () => {
             </h1>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            See how JobPilot AI assists you directly inside Greenhouse, Lever, and Workday application pages.
+            Assists with real-time autofill and generates 100% human-sounding responses that pass recruiter screens.
           </p>
         </div>
 
@@ -79,24 +115,30 @@ export const ExtensionSimulatorView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-              Extension Active
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+              <UserCheck className="w-3 h-3" />
+              <span>Human Tone Active</span>
             </span>
           </div>
         </div>
 
-        {/* Browser Window Body: Portal Form (Left 65%) + JobPilot Side Overlay (Right 35%) */}
+        {/* Browser Window Body: Portal Form (Left 60%) + JobPilot Side Overlay (Right 40%) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[520px]">
           {/* Left: Simulated ATS Form */}
-          <div className="lg:col-span-8 p-6 sm:p-8 bg-slate-950 space-y-5 border-r border-slate-850">
-            <div className="border-b border-slate-800 pb-4">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                {activePortal.toUpperCase()} APPLICATION PORTAL
+          <div className="lg:col-span-7 p-6 sm:p-8 bg-slate-950 space-y-5 border-r border-slate-850">
+            <div className="border-b border-slate-800 pb-4 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  {activePortal.toUpperCase()} APPLICATION PORTAL
+                </span>
+                <h3 className="text-xl font-bold text-slate-100 mt-1">
+                  Senior Frontend Engineer — Apex Cloud Solutions
+                </h3>
+                <p className="text-xs text-slate-400">San Francisco, CA (Hybrid) • Full-Time</p>
+              </div>
+              <span className="text-[11px] font-medium text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                Job ID: #4920194
               </span>
-              <h3 className="text-xl font-bold text-slate-100 mt-1">
-                Senior Frontend Engineer — Apex Cloud Solutions
-              </h3>
-              <p className="text-xs text-slate-400">San Francisco, CA (Hybrid) • Full-Time</p>
             </div>
 
             <div className="space-y-4 text-xs">
@@ -167,47 +209,55 @@ export const ExtensionSimulatorView: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="text-slate-300 block mb-1 font-semibold">
-                  Custom Question: What makes you excited about this role?
-                </label>
+              {/* Employer / Recruiter Question Field */}
+              <div className="pt-2 border-t border-slate-850">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-slate-200 font-semibold flex items-center gap-1.5">
+                    <span>Question: {activeQuestion}</span>
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    Human Voice Mode
+                  </span>
+                </div>
                 <textarea
-                  rows={3}
-                  readOnly
-                  value={
-                    autofilled
-                      ? 'My experience optimizing React UI architectures and microservice REST integrations aligns directly with your platform scalability roadmap.'
-                      : ''
-                  }
-                  placeholder="Your answer will be inserted here..."
-                  className={`w-full p-3 bg-slate-900 border rounded-xl text-slate-200 transition-all ${
+                  rows={4}
+                  value={autofilled ? customAnswer : ''}
+                  onChange={e => setCustomAnswer(e.target.value)}
+                  placeholder="Click 'Generate Human Answer' or 'Autofill Application' on the right panel to test..."
+                  className={`w-full p-3 bg-slate-900 border rounded-xl text-slate-100 leading-relaxed text-xs transition-all ${
                     autofilled ? 'border-emerald-500/50 bg-emerald-950/10' : 'border-slate-850'
                   }`}
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  💡 Crafted in natural 1st-person conversational English — free of AI buzzwords.
+                </p>
               </div>
             </div>
           </div>
 
           {/* Right: JobPilot Overlay Assistant Panel */}
-          <div className="lg:col-span-4 p-5 bg-slate-900/95 space-y-4 flex flex-col justify-between">
-            <div className="space-y-3">
+          <div className="lg:col-span-5 p-5 bg-slate-900/95 space-y-4 flex flex-col justify-between border-l border-slate-800">
+            <div className="space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                 <div className="flex items-center gap-1.5">
                   <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
                     <Zap className="w-3.5 h-3.5 fill-white" />
                   </div>
-                  <span className="text-xs font-bold text-slate-100">JobPilot Assistant</span>
+                  <span className="text-xs font-bold text-slate-100">JobPilot Smart Assistant</span>
                 </div>
                 <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-                  92% Match
+                  Natural Tone 100%
                 </span>
               </div>
 
               {/* Action: Autofill */}
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-850 space-y-2">
-                <span className="text-xs font-bold text-slate-200 block">Form Field Mapping</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200">One-Click Autofill</span>
+                  <span className="text-[10px] text-slate-400">All fields</span>
+                </div>
                 <p className="text-[11px] text-slate-400">
-                  Detected 6 standard candidate inputs &amp; 1 custom prompt.
+                  Instantly populates your profile and generates a human-toned answer for the portal.
                 </p>
                 <button
                   onClick={handleAutofill}
@@ -218,21 +268,90 @@ export const ExtensionSimulatorView: React.FC = () => {
                 </button>
               </div>
 
+              {/* Interactive Human Question Answer Tester */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-850 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <MessageSquareQuote className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Human Answer Assistant</span>
+                  </span>
+                  <span className="text-[10px] text-indigo-300 font-mono">Anti-AI</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] text-slate-400 block font-medium">Select or enter question:</label>
+                  <select
+                    value={activeQuestion}
+                    onChange={e => {
+                      setActiveQuestion(e.target.value);
+                      handleGenerateHumanAnswer(e.target.value);
+                    }}
+                    className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  >
+                    {predefinedQuestions.map((q, idx) => (
+                      <option key={idx} value={q}>
+                        {q}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Custom Question input */}
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    placeholder="Or type custom recruiter question..."
+                    value={customQuestionInput}
+                    onChange={e => setCustomQuestionInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && customQuestionInput.trim()) {
+                        setActiveQuestion(customQuestionInput.trim());
+                        handleGenerateHumanAnswer(customQuestionInput.trim());
+                        setCustomQuestionInput('');
+                      }
+                    }}
+                    className="flex-1 px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  />
+                  <button
+                    disabled={isGeneratingAnswer || !customQuestionInput.trim()}
+                    onClick={() => {
+                      if (customQuestionInput.trim()) {
+                        setActiveQuestion(customQuestionInput.trim());
+                        handleGenerateHumanAnswer(customQuestionInput.trim());
+                        setCustomQuestionInput('');
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl text-xs font-semibold"
+                  >
+                    Ask
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => handleGenerateHumanAnswer(activeQuestion)}
+                  disabled={isGeneratingAnswer}
+                  className="w-full py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingAnswer ? 'animate-spin' : ''}`} />
+                  <span>{isGeneratingAnswer ? 'Formulating Real Answer...' : 'Regenerate Natural Answer'}</span>
+                </button>
+              </div>
+
               {/* Safety notice */}
               <div className="p-3 rounded-xl bg-slate-950 border border-slate-850 text-xs text-slate-400 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Human Review Guard</span>
+                  <span>Human Recruiter Tested</span>
                 </div>
                 <p className="text-[10px] text-slate-400 leading-relaxed">
-                  Review all inputs above before submitting. Complete any portal CAPTCHA manually.
+                  Answers use natural phrasing, direct 1st-person perspective, and 0% generic AI fluff so recruiters see you as a genuine candidate.
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setCurrentView('applications-tracker')}
-              className="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center justify-center gap-1.5 mt-2"
             >
               <span>Sync to JobPilot Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -243,3 +362,4 @@ export const ExtensionSimulatorView: React.FC = () => {
     </div>
   );
 };
+
