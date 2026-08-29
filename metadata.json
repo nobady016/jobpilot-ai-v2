@@ -1,0 +1,6 @@
+{
+  "name": "JobPilot AI",
+  "description": "Production-ready AI job application assistant for transparent matching, truthful resume tailoring, assisted form filling, and job search tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
