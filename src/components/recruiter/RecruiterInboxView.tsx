@@ -277,14 +277,26 @@ export const RecruiterInboxView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Forward Re-send button */}
-              <button
-                onClick={() => resendForwardRecruiterMessage(selectedMessage.id, targetForwardEmail)}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-center"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Re-send Forward</span>
-              </button>
+              {/* Forward Re-send & Direct Gmail button */}
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                <a
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetForwardEmail)}&su=${encodeURIComponent(`[Recruiter Reply] ${selectedMessage.subject}`)}&body=${encodeURIComponent(`From: ${selectedMessage.senderName} <${selectedMessage.senderEmail}>\nCompany: ${selectedMessage.company}\nDate: ${new Date(selectedMessage.receivedAt).toLocaleString()}\n\nMessage:\n${selectedMessage.body}\n\n---\nSuggested Human Response:\n${selectedMessage.suggestedReply?.body || ''}`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open in Gmail</span>
+                </a>
+
+                <button
+                  onClick={() => resendForwardRecruiterMessage(selectedMessage.id, targetForwardEmail)}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Re-send Forward</span>
+                </button>
+              </div>
             </div>
 
             {/* Inbound Email Body Display */}
