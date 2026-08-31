@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Mail,
   Send,
@@ -46,6 +46,16 @@ export const RecruiterInboxView: React.FC = () => {
   const selectedMessage: RecruiterMessage | undefined = recruiterMessages.find(
     m => m.id === selectedMessageId
   ) || recruiterMessages[0];
+
+  useEffect(() => {
+    if (selectedMessage) {
+      if (selectedMessage.candidateReplied && selectedMessage.candidateReplyText) {
+        setReplyDraft(selectedMessage.candidateReplyText);
+      } else if (selectedMessage.suggestedReply?.body) {
+        setReplyDraft(selectedMessage.suggestedReply.body);
+      }
+    }
+  }, [selectedMessage?.id]);
 
   const unreadCount = recruiterMessages.filter(m => !m.read).length;
 
