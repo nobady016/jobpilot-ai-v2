@@ -240,7 +240,7 @@ class StorageDatabase {
   }
 
   addRecruiterMessage(msg: Omit<RecruiterMessage, 'id' | 'receivedAt' | 'forwardedAt' | 'forwardStatus' | 'forwardedToUserEmail' | 'read'> & { forwardedToUserEmail?: string; read?: boolean }): RecruiterMessage {
-    const userEmail = msg.forwardedToUserEmail || this.jobPreferences.forwardDestinationEmail || this.userProfile.email || 'nobady016@gmail.com';
+    const userEmail = msg.forwardedToUserEmail || this.jobPreferences.forwardDestinationEmail || this.userProfile.email || 'user@example.com';
     const now = new Date().toISOString();
     const id = `msg_rec_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
@@ -308,7 +308,7 @@ class StorageDatabase {
   resendForwardRecruiterMessage(id: string, targetEmail?: string): { success: boolean; deliveredTo: string } | null {
     const m = this.recruiterMessages.find(item => item.id === id);
     if (!m) return null;
-    const dest = targetEmail || this.jobPreferences.forwardDestinationEmail || 'nobady016@gmail.com';
+    const dest = targetEmail || this.jobPreferences.forwardDestinationEmail || this.userProfile.email || 'user@example.com';
     m.forwardedToUserEmail = dest;
     m.forwardedAt = new Date().toISOString();
     m.forwardStatus = 'delivered';

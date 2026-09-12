@@ -24,6 +24,7 @@ import { RecruiterMessage } from '../../types';
 export const RecruiterInboxView: React.FC = () => {
   const {
     recruiterMessages,
+    userProfile,
     jobPreferences,
     updatePreferences,
     markRecruiterMessageRead,
@@ -39,7 +40,7 @@ export const RecruiterInboxView: React.FC = () => {
   const [replyDraft, setReplyDraft] = useState<string>('');
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [targetForwardEmail, setTargetForwardEmail] = useState<string>(
-    jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com'
+    jobPreferences?.forwardDestinationEmail || userProfile?.email || 'alex.mercer@example.com'
   );
   const [isSavingEmail, setIsSavingEmail] = useState<boolean>(false);
 
@@ -154,7 +155,7 @@ export const RecruiterInboxView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-200">Auto-Forward Destination:</span>
                 <span className="font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-semibold">
-                  {jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com'}
+                  {jobPreferences?.forwardDestinationEmail || userProfile?.email || 'alex.mercer@example.com'}
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400">
                   <CheckCircle2 className="w-3 h-3" /> Active &amp; Verified

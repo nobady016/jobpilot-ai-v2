@@ -54,7 +54,7 @@ export const MainDashboard: React.FC = () => {
   const strongMatches = jobs.filter(j => j.matchScore >= 85).slice(0, 3);
   const activeReminders = reminders.filter(r => !r.completed);
   const unreadRecruiterCount = recruiterMessages.filter(m => !m.read).length;
-  const forwardEmail = jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com';
+  const forwardEmail = jobPreferences?.forwardDestinationEmail || userProfile?.email || 'your-email@example.com';
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-200">

@@ -42,7 +42,7 @@ export const CommandPalette: React.FC = () => {
   const navItems = [
     { label: 'Dashboard Overview', view: 'dashboard' as AppView, icon: Layers, desc: 'Application stats & quick recommendations' },
     { label: 'Autonomous Auto-Apply Bot', view: 'auto-apply' as AppView, icon: Sparkles, desc: 'Automatic 10-15 daily applications engine' },
-    { label: 'Recruiter Replies & Email Forwarding', view: 'recruiter-inbox' as AppView, icon: Mail, desc: 'Inbound recruiter responses forwarded to nobady016@gmail.com' },
+    { label: 'Recruiter Replies & Email Forwarding', view: 'recruiter-inbox' as AppView, icon: Mail, desc: 'Inbound recruiter responses and interview invites' },
     { label: 'Find & Discover Jobs', view: 'jobs' as AppView, icon: Compass, desc: 'Search open listings with match scores' },
     { label: 'Applications Kanban & Tracker', view: 'applications-tracker' as AppView, icon: Briefcase, desc: 'Manage your active job pipeline' },
     { label: 'Resume Tailor & ATS Optimizer', view: 'resume-tailor' as AppView, icon: Sparkles, desc: 'Truth-grounded tailored resume' },

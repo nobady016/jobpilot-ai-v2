@@ -50,7 +50,7 @@ export const SettingsView: React.FC = () => {
     autoApplyEnabled: jobPreferences?.autoApplyEnabled ?? true,
     autoApplyDailyTarget: jobPreferences?.autoApplyDailyTarget || 12,
     autoApplyMinMatchScore: jobPreferences?.autoApplyMinMatchScore || 85,
-    forwardDestinationEmail: jobPreferences?.forwardDestinationEmail || 'nobady016@gmail.com',
+    forwardDestinationEmail: jobPreferences?.forwardDestinationEmail || userProfile?.email || 'alex.mercer@example.com',
     instantEmailAlertOnRecruiterReply: jobPreferences?.instantEmailAlertOnRecruiterReply ?? true
   });
 
@@ -305,7 +305,7 @@ export const SettingsView: React.FC = () => {
                 type="email"
                 value={prefForm.forwardDestinationEmail}
                 onChange={e => setPrefForm({ ...prefForm, forwardDestinationEmail: e.target.value })}
-                placeholder="nobady016@gmail.com"
+                placeholder="your.email@example.com"
                 className="w-full px-3 py-2.5 bg-slate-950 border border-indigo-500/40 rounded-xl text-slate-100 font-mono text-xs focus:outline-none focus:border-indigo-400"
               />
               <p className="text-[11px] text-slate-400 mt-1">

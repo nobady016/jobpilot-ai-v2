@@ -416,7 +416,7 @@ async function startServer() {
     const comp = companyName || targetApp.company || 'Linear Dynamics';
     const title = targetApp.jobTitle || 'Frontend Engineer';
     const userProfile = db.getProfile();
-    const destEmail = db.getPreferences().forwardDestinationEmail || userProfile.email || 'nobady016@gmail.com';
+    const destEmail = db.getPreferences().forwardDestinationEmail || userProfile.email || 'user@example.com';
 
     let subject = customSubject || `Interview Invitation: ${title} at ${comp}`;
     let snippet = `Hi ${userProfile.name}, our engineering team reviewed your recent application and would love to invite you for a 30-minute technical interview...`;

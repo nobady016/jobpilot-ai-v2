@@ -876,7 +876,7 @@ export const api = {
         body: JSON.stringify({ targetEmail }),
       },
       () => {
-        return { success: true, deliveredTo: targetEmail || 'nobady016@gmail.com' };
+        return { success: true, deliveredTo: targetEmail || 'alex.mercer@example.com' };
       }
     );
   },
@@ -906,7 +906,7 @@ export const api = {
           receivedAt: now,
           messageType: 'interview_invite',
           sentiment: 'positive',
-          forwardedToUserEmail: 'nobady016@gmail.com',
+          forwardedToUserEmail: 'alex.mercer@example.com',
           forwardStatus: 'delivered',
           forwardedAt: now,
           read: false
@@ -916,7 +916,7 @@ export const api = {
         setStorageItem('recruiter_messages', msgs);
         return {
           message: 'Inbound recruiter reply simulated and instantly forwarded to user email',
-          forwardedTo: 'nobady016@gmail.com',
+          forwardedTo: 'alex.mercer@example.com',
           data: dummy
         };
       }
